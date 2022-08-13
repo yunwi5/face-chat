@@ -1,8 +1,9 @@
 import React from 'react';
-import { Helmet } from 'react-helmet';
-import ChatRoomMain from 'components/video-chat-room/ChatRoomMain';
-import { APP_NAME } from 'constants/globals';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
+import { APP_NAME } from 'constants/globals';
+import ChatRoomMain from 'components/video-chat-room/ChatRoomMain';
+import ChatRoomHeader from 'components/video-chat-room/layout/ChatRoomHeader';
 
 const ChatRoom = () => {
     const navigate = useNavigate();
@@ -22,6 +23,7 @@ const ChatRoom = () => {
                 <title>Video Chat Room | {APP_NAME}</title>
                 <meta name="description" content="Video chat room of multiple real users" />
             </Helmet>
+            <ChatRoomHeader />
             <ChatRoomMain channelName={channelName || ''} displayName={displayName || ''} />
         </>
     );

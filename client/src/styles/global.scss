@@ -161,6 +161,7 @@ a {
     cursor: pointer;
     background: transparent;
     border: none;
+    fill: #ebe0e0;
 }
 
 #members__button:hover svg > path,
@@ -172,6 +173,7 @@ a {
 .nav__link svg {
     width: 0;
     height: 0;
+    fill: #fff;
 }
 
 @media (max-width: 640px) {
