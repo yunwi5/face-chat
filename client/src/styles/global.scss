@@ -1,13 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
 
-@import "./abstract/variables";
-@import "./abstract/mixins";
-@import "./abstract/functions";
-@import "./base/animations";
-@import "./base/utilities";
+@import './abstract/variables';
+@import './abstract/mixins';
+@import './abstract/functions';
+@import './base/animations';
+@import './base/utilities';
 
-@import "./pages/lobby";
-@import "./pages/room";
+@import './pages/lobby';
+@import './pages/room';
 
 * {
     font-family: 'Poppins', sans-serif;
@@ -36,14 +36,18 @@
     background: #845695;
 }
 
-body {
-    background-color: #1a1a1a;
-    color: #fff;
-
-    font-size: 14px;
+*,
+*::before,
+*::after {
     padding: 0;
     margin: 0;
     box-sizing: border-box;
+}
+
+body {
+    background-color: #1a1a1a;
+    color: #fff;
+    font-size: 14px;
 }
 
 p,
