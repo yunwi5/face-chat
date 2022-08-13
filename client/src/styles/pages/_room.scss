@@ -1,5 +1,4 @@
 .container {
-    margin-top: 74px;
     height: calc(100vh - 74px);
     width: 100%;
     position: relative;
@@ -34,11 +33,9 @@
     display: flex;
     justify-content: space-around;
     align-items: center;
-    padding: 0 1rem;
-    position: fixed;
+    padding: 0.7rem 1rem;
     font-size: 18px;
     background-color: #323143;
-    width: 218px;
 }
 
 #member__list {
@@ -82,12 +79,15 @@
     max-width: 25rem;
     overflow-y: auto;
     border-left: 1px solid #111;
+    display: flex;
+    flex-direction: column;
 }
 
 #messages {
     width: 100%;
     height: 100%;
     overflow-y: auto;
+    flex-grow: 10;
 }
 
 .message__wrapper:last-child {
@@ -134,8 +134,8 @@
 }
 
 #message__form {
-    width: 23.2rem;
-    position: fixed;
+    // width: 23.2rem;
+    // position: fixed;
     bottom: 0;
     display: block;
     background-color: #1a1a1a;
@@ -166,17 +166,17 @@
     width: calc(100% - 40.7rem);
     position: fixed;
     left: 15.7rem;
-    top: calc(100vh - 72px);
     overflow-y: auto;
-    height: 100%;
+    height: Min(100%, 88vh);
+
+    display: flex;
+    flex-direction: column;
 }
 
 #stream__box {
     position: relative;
     background-color: #3f434a;
     height: 60vh;
-    /* None initially */
-    display: none;
 }
 
 /* Expanded rectangular video frame inside displayFrame */
@@ -200,8 +200,8 @@
     gap: 2em;
     justify-content: center;
     align-items: center;
-    margin-top: 25px;
-    margin-bottom: 225px;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
 /* Normal circular video frame container */
@@ -242,15 +242,16 @@
 }
 
 .stream__actions {
-    position: fixed;
-    bottom: 1rem;
     border-radius: 8px;
     background-color: #1a1a1a60;
     padding: 1rem;
-    left: 50%;
-    display: none;
     gap: 1rem;
-    transform: translateX(-50%);
+
+    display: flex;
+    gap: 1rem;
+    margin-top: auto;
+    margin-bottom: 1rem;
+    justify-content: center;
 }
 
 .stream__actions a,

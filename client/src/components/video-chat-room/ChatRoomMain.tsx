@@ -1,18 +1,23 @@
 import React, { useState } from 'react';
 import { useRtcContext } from 'store/context/RtcContext';
+import VideoCall from './video-call/VideoCall';
 
-interface Props {
-    channelName: string;
-    displayName: string;
-}
+interface Props {}
 
-const ChatRoomMain: React.FC<Props> = ({ channelName, displayName }) => {
+const ChatRoomMain: React.FC<Props> = () => {
     const { inCall } = useRtcContext();
+    console.log('inCall:', inCall);
 
     return (
-        <div style={{ color: 'white' }}>
-            {inCall ? 'We are in the call!' : 'Waiting to join call!'}
-        </div>
+        <main className="container">
+            {inCall ? (
+                <>
+                    <VideoCall />
+                </>
+            ) : (
+                'Waiting to join call!'
+            )}
+        </main>
     );
 };
 

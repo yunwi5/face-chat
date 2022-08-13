@@ -5,6 +5,7 @@ import ChatRoom from './pages/ChatRoom';
 import Home from 'pages/Home';
 import Lobby from 'pages/Lobby';
 import Header from 'layout/header/Header';
+import { config } from 'config/settings';
 
 function App() {
     const pathname = useLocation().pathname;
@@ -24,7 +25,6 @@ function App() {
 
 function includeDefaultHeader(pathname: string) {
     const excludeRoutes = ['/video-chat/'];
-    console.log(pathname);
     for (const excRoute of excludeRoutes) {
         if (pathname.includes(excRoute)) return false;
     }
