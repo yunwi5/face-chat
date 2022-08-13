@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet';
 import { APP_NAME } from 'constants/globals';
 import ChatRoomMain from 'components/video-chat-room/ChatRoomMain';
 import ChatRoomHeader from 'components/video-chat-room/layout/ChatRoomHeader';
+import { RtcContextProvider } from 'store/context/RtcContext';
 
 const ChatRoom = () => {
     const navigate = useNavigate();
@@ -23,8 +24,13 @@ const ChatRoom = () => {
                 <title>Video Chat Room | {APP_NAME}</title>
                 <meta name="description" content="Video chat room of multiple real users" />
             </Helmet>
-            <ChatRoomHeader />
-            <ChatRoomMain channelName={channelName || ''} displayName={displayName || ''} />
+            <RtcContextProvider>
+                <ChatRoomHeader />
+                <ChatRoomMain
+                    channelName={channelName || ''}
+                    displayName={displayName || ''}
+                />
+            </RtcContextProvider>
         </>
     );
 };
