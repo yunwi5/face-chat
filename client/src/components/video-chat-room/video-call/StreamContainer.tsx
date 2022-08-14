@@ -11,7 +11,7 @@ interface Props {
 }
 
 const StreamsContainer: React.FC<Props> = ({ tracks }) => {
-    const { ready, start, client } = useRtcContext();
+    const { ready, start, sharingScreen } = useRtcContext();
 
     const [trackState, setTrackState] = useState<ITrackState>({
         audio: true,
@@ -21,10 +21,12 @@ const StreamsContainer: React.FC<Props> = ({ tracks }) => {
     // toggle mic, videos.
     const handleTrackState = async (type: TrackType) => {
         if (type === 'audio') {
+            await tracks[0].setEnabled(!trackState.audio);
             setTrackState((ps) => {
                 return { ...ps, audio: !ps.audio };
             });
         } else if (type === 'video') {
+            await tracks[1].setEnabled(!trackState.video);
             setTrackState((ps) => {
                 return { ...ps, video: !ps.video };
             });
@@ -32,19 +34,11 @@ const StreamsContainer: React.FC<Props> = ({ tracks }) => {
     };
 
     useEffect(() => {
-        const updateTracks = async () => {
-            await tracks[0].setMuted(!trackState.audio);
-            // await tracks[0].setEnabled(trackState.audio);
-            await tracks[1].setMuted(!trackState.video);
-            // await tracks[1].setEnabled(trackState.video);
-            if (!trackState.video) {
-                console.log('Unpublish video');
-                await client?.unpublish(tracks[1]);
-            }
-            console.log('New tracks state:', trackState.video);
-        };
-        updateTracks();
-    }, [trackState, tracks, client]);
+        if (sharingScreen) {
+            tracks[1].setEnabled(true);
+            setTrackState((ps) => ({ ...ps, video: true }));
+        }
+    }, [sharingScreen, tracks]);
 
     return (
         <section id="stream__container">

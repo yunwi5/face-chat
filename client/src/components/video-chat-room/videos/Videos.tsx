@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useSyncExternalStore } from 'react';
 import { AgoraVideoPlayer } from 'agora-rtc-react';
 import { useRtcContext } from 'store/context/RtcContext';
 import { BaseImages } from 'constants/images';
@@ -29,6 +29,11 @@ const Videos: React.FC<Props> = ({ videoState }) => {
                     style={{ width: frameSize, height: frameSize }}
                     onClick={() => setDisplayFrameUid(uid)}
                 >
+                    <img
+                        className={'video__image'}
+                        src={BaseImages.logo}
+                        alt={`User Placeholder`}
+                    />
                     {videoState && clientVideoTrack ? (
                         <AgoraVideoPlayer
                             className="vid"
@@ -36,9 +41,7 @@ const Videos: React.FC<Props> = ({ videoState }) => {
                             videoTrack={clientVideoTrack}
                             style={{ height: '100%', width: '100%' }}
                         />
-                    ) : (
-                        <img src={BaseImages.logo} alt={`User Placeholder`} />
-                    )}
+                    ) : null}
                 </div>
             )}
             {users.map((user) => {
@@ -53,6 +56,11 @@ const Videos: React.FC<Props> = ({ videoState }) => {
                         style={{ width: frameSize, height: frameSize }}
                         onClick={() => setDisplayFrameUid(user.uid)}
                     >
+                        <img
+                            className={'video__image'}
+                            src={BaseImages.logo}
+                            alt={`User Placeholder`}
+                        />
                         {user.videoTrack ? (
                             <AgoraVideoPlayer
                                 className="vid"
@@ -60,9 +68,7 @@ const Videos: React.FC<Props> = ({ videoState }) => {
                                 videoTrack={user.videoTrack}
                                 style={{ height: '100%', width: '100%' }}
                             />
-                        ) : (
-                            <img src={BaseImages.logo} alt={`User Placeholder`} />
-                        )}
+                        ) : null}
                     </div>
                 );
             })}

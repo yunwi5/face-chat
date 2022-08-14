@@ -1,4 +1,3 @@
-import { ICameraVideoTrack, IMicrophoneAudioTrack } from 'agora-rtc-react';
 import { ITrackState, TrackType } from 'models/track-types';
 import { useNavigate } from 'react-router-dom';
 import { useRtcContext } from 'store/context/RtcContext';

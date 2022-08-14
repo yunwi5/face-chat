@@ -215,11 +215,29 @@
     overflow: hidden;
     height: 300px;
     width: 300px;
+    position: relative;
+    overflow: hidden !important;
 
     // background-image: url('/images/logo.png');
     background-repeat: no-repeat;
     background-position: center;
     background-size: 75px;
+    z-index: 1;
+}
+
+.video__container video {
+    position: inherit;
+    z-index: 10;
+}
+
+.video__image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #aaa;
+    z-index: 2;
 }
 
 .video-player {
