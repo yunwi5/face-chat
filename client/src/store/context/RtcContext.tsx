@@ -12,7 +12,6 @@ import { getLocalScreenVideoTrack, ILocalScreenTrack } from 'utils/chat-utils/vi
 
 interface IRtcContext {
     start: boolean;
-    ready: boolean;
     users: IAgoraRTCRemoteUser[];
     tracks: [IMicrophoneAudioTrack, ICameraVideoTrack] | null;
     leaveChannel: () => void;
@@ -29,7 +28,6 @@ interface IRtcContext {
 
 export const RtcContext = React.createContext<IRtcContext>({
     start: false,
-    ready: false,
     users: [],
     tracks: null,
     leaveChannel: () => {},
@@ -63,16 +61,17 @@ export const RtcContextProvider: React.FC<Props> = (props) => {
     // inCall controls user entering or leaving the stream.
     const [users, setUsers] = useState<IAgoraRTCRemoteUser[]>([]);
     const [start, setStart] = useState<boolean>(false);
-    const client = useClient();
-    // const [client, setClient] = useState<IAgoraRTCClient | null>(null);
+    // const client = useClient();
+    const [client, setClient] = useState<IAgoraRTCClient | null>(null);
 
     const [displayFrameUid, setDisplayFrameUid] = useState<UID | null>(null);
 
     const [sharingScreen, setSharingScreen] = useState(false);
     const [localScreenTracks, setLocalScreenTracks] = useState<ILocalScreenTrack>(null);
 
-    // ready if user microphone and cameras are ready to work.
-    const { ready, tracks } = useMicrophoneAndCameraTracks();
+    const [tracks, setTracks] = useState<[IMicrophoneAudioTrack, ICameraVideoTrack] | null>(
+        null,
+    );
 
     useEffect(() => {
         // function to initialise the SDK
@@ -80,9 +79,11 @@ export const RtcContextProvider: React.FC<Props> = (props) => {
             console.log('init', name);
 
             // Agora RTC SDK
-            // const newClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-            client.on('user-published', async (user, mediaType) => {
-                await client.subscribe(user, mediaType);
+            const newClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+            await newClient.join(config.appId, name, config.token, uid);
+
+            newClient.on('user-published', async (user, mediaType) => {
+                await newClient.subscribe(user, mediaType);
                 console.log('subscribe success');
                 if (mediaType === 'video') {
                     user?.videoTrack?.play(`user-${user.uid}`);
@@ -105,7 +106,7 @@ export const RtcContextProvider: React.FC<Props> = (props) => {
                 });
             });
 
-            client.on('user-unpublished', (user, type) => {
+            newClient.on('user-unpublished', (user, type) => {
                 console.log('User Unpublished!!!', user, type);
                 if (type === 'audio') {
                     user.audioTrack?.stop();
@@ -113,35 +114,37 @@ export const RtcContextProvider: React.FC<Props> = (props) => {
                 if (type === 'video') {
                     console.log('Unpublish user video of user:', user.uid);
                     user.videoTrack?.stop();
-                    // setUsers((prevUsers) => {
-                    // return prevUsers.filter((User) => User.uid !== user.uid);
-                    // });
                 }
                 setUsers((prevUsers) => [...prevUsers]);
             });
 
-            client.on('user-left', (user) => {
+            newClient.on('user-left', (user) => {
                 console.log('leaving', user);
                 setUsers((prevUsers) => {
                     return prevUsers.filter((User) => User.uid !== user.uid);
                 });
             });
 
-            await client.join(config.appId, name, config.token, uid);
-            if (tracks) {
-                tracks[1].play(`user-${uid}`);
-                await client.publish([tracks[0], tracks[1]]);
-            }
+            const tracks = await AgoraRTC.createMicrophoneAndCameraTracks(
+                {},
+                {
+                    encoderConfig: {
+                        width: { min: 640, ideal: 1920, max: 1920 },
+                        height: { min: 480, ideal: 1080, max: 1080 },
+                    },
+                },
+            );
 
-            // setClient(newClient);
+            tracks[1].play(`user-${uid}`);
+            await newClient.publish([tracks[0], tracks[1]]);
+
+            setClient(newClient);
+            setTracks(tracks);
             setStart(true);
         };
 
-        if (ready && tracks) {
-            console.log('init ready');
-            init(channelName);
-        }
-    }, [channelName, ready, client, tracks, uid]);
+        init(channelName);
+    }, [channelName, client, uid]);
 
     const leaveChannel = async () => {
         if (!client) return;
@@ -220,7 +223,7 @@ export const RtcContextProvider: React.FC<Props> = (props) => {
     const value = {
         uid,
         start,
-        ready,
+        ready: true,
         tracks,
         users,
         leaveChannel,

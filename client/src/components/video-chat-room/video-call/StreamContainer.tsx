@@ -11,7 +11,7 @@ interface Props {
 }
 
 const StreamsContainer: React.FC<Props> = ({ tracks }) => {
-    const { ready, start, sharingScreen } = useRtcContext();
+    const { start, sharingScreen } = useRtcContext();
 
     const [trackState, setTrackState] = useState<ITrackState>({
         audio: true,
@@ -21,12 +21,12 @@ const StreamsContainer: React.FC<Props> = ({ tracks }) => {
     // toggle mic, videos.
     const handleTrackState = async (type: TrackType) => {
         if (type === 'audio') {
-            await tracks[0].setEnabled(!trackState.audio);
+            await tracks[0].setMuted(trackState.audio);
             setTrackState((ps) => {
                 return { ...ps, audio: !ps.audio };
             });
         } else if (type === 'video') {
-            await tracks[1].setEnabled(!trackState.video);
+            await tracks[1].setMuted(trackState.video);
             setTrackState((ps) => {
                 return { ...ps, video: !ps.video };
             });
@@ -46,7 +46,7 @@ const StreamsContainer: React.FC<Props> = ({ tracks }) => {
             {start && <DisplayVideoFrame videoState={trackState.video} />}
             {/* Video frames for other users */}
             {start && <Videos videoState={trackState.video} />}
-            {ready && <Controls trackState={trackState} onHandleTracks={handleTrackState} />}
+            <Controls trackState={trackState} onHandleTracks={handleTrackState} />
         </section>
     );
 };
