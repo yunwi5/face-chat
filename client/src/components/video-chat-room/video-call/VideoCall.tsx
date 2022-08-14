@@ -6,12 +6,12 @@ import StreamContainer from './StreamContainer';
 
 // display overall chat room layout
 const VideoCall = () => {
-    const { ready, tracks } = useRtcContext();
+    const { tracks } = useRtcContext();
 
     return (
         <div id="room__container">
             <ParticipantsSidebar />
-            {ready && tracks && <StreamContainer tracks={tracks} />} <ChatMessageSidebar />
+            {tracks && <StreamContainer tracks={tracks} />} <ChatMessageSidebar />
         </div>
     );
 };

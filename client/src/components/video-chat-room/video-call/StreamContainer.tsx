@@ -11,6 +11,8 @@ interface Props {
 }
 
 const StreamsContainer: React.FC<Props> = ({ tracks }) => {
+    const { ready, start, client } = useRtcContext();
+
     const [trackState, setTrackState] = useState<ITrackState>({
         audio: true,
         video: true,
@@ -32,19 +34,25 @@ const StreamsContainer: React.FC<Props> = ({ tracks }) => {
     useEffect(() => {
         const updateTracks = async () => {
             await tracks[0].setMuted(!trackState.audio);
+            // await tracks[0].setEnabled(trackState.audio);
             await tracks[1].setMuted(!trackState.video);
+            // await tracks[1].setEnabled(trackState.video);
+            if (!trackState.video) {
+                console.log('Unpublish video');
+                await client?.unpublish(tracks[1]);
+            }
             console.log('New tracks state:', trackState.video);
         };
         updateTracks();
-    }, [trackState, tracks]);
+    }, [trackState, tracks, client]);
 
     return (
         <section id="stream__container">
             {/* Larger video frame for one focused user */}
-            <DisplayVideoFrame videoState={trackState.video} />
+            {start && <DisplayVideoFrame videoState={trackState.video} />}
             {/* Video frames for other users */}
-            <Videos videoState={trackState.video} tracks={tracks} />
-            <Controls trackState={trackState} onHandleTracks={handleTrackState} />
+            {start && <Videos videoState={trackState.video} />}
+            {ready && <Controls trackState={trackState} onHandleTracks={handleTrackState} />}
         </section>
     );
 };

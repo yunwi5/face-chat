@@ -4,10 +4,21 @@ import {
     ICameraVideoTrack,
     IMicrophoneAudioTrack,
     UID,
-    IRemoteVideoTrack,
 } from 'agora-rtc-react';
+import AgoraRTC, {
+    IRemoteVideoTrack,
+    ILocalAudioTrack,
+    ILocalVideoTrack,
+} from 'agora-rtc-sdk-ng';
 import { config, useClient, useMicrophoneAndCameraTracks } from 'config/settings';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
+
+type ILocalScreenTrack = ILocalVideoTrack | [ILocalVideoTrack, ILocalAudioTrack] | null;
+
+function getLocalScreenVideoTrack(localScreenTracks: ILocalScreenTrack) {
+    if (localScreenTracks == null) return null;
+    return Array.isArray(localScreenTracks) ? localScreenTracks[0] : localScreenTracks;
+}
 
 interface IRtcContext {
     start: boolean;
@@ -20,8 +31,12 @@ interface IRtcContext {
     displayFrameUser: DisplayFrameUser | null;
     setDisplayFrameUid: React.Dispatch<React.SetStateAction<UID | null>>;
     uid: string;
-    client: IAgoraRTCClient;
+    client: IAgoraRTCClient | null;
     // callUpdate: Function;
+    toggleScreen: () => void;
+    localScreenTracks: ILocalScreenTrack;
+    clientVideoTrack: ILocalVideoTrack | null;
+    sharingScreen: boolean;
 }
 
 export const RtcContext = React.createContext<IRtcContext>({
@@ -34,8 +49,12 @@ export const RtcContext = React.createContext<IRtcContext>({
     leaveChannel: () => {},
     displayFrameUser: null,
     setDisplayFrameUid: () => {},
-    client: '' as any,
+    client: null as any,
     uid: '',
+    toggleScreen: () => {},
+    localScreenTracks: null,
+    sharingScreen: false,
+    clientVideoTrack: null,
 });
 
 // custom hook
@@ -50,7 +69,7 @@ interface Props {
 
 interface DisplayFrameUser {
     uid: UID | null;
-    videoTrack?: ICameraVideoTrack | IRemoteVideoTrack | null;
+    videoTrack?: ICameraVideoTrack | IRemoteVideoTrack | ILocalVideoTrack | null;
 }
 
 export const RtcContextProvider: React.FC<Props> = (props) => {
@@ -59,59 +78,64 @@ export const RtcContextProvider: React.FC<Props> = (props) => {
     const [inCall, setInCall] = useState(true);
     const [users, setUsers] = useState<IAgoraRTCRemoteUser[]>([]);
     const [start, setStart] = useState<boolean>(false);
-    const client = useClient();
+    // const client = useClient();
+    const [client, setClient] = useState<IAgoraRTCClient | null>(null);
 
     const [displayFrameUid, setDisplayFrameUid] = useState<UID | null>(null);
+
+    const [sharingScreen, setSharingScreen] = useState(false);
+    const [localScreenTracks, setLocalScreenTracks] = useState<ILocalScreenTrack>(null);
 
     // ready if user microphone and cameras are ready to work.
     const { ready, tracks } = useMicrophoneAndCameraTracks();
 
     useEffect(() => {
         // function to initialise the SDK
-        let init = async (channelName: string) => {
-            console.log('init', channelName);
-            client.on('user-published', async (user, mediaType) => {
-                await client.subscribe(user, mediaType);
-                console.log('subscribe success');
+        let init = async (name: string) => {
+            console.log('init', name);
 
+            // Agora RTC SDK
+            const newClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+            await newClient.join(config.appId, name, config.token, uid);
+
+            newClient.on('user-published', async (user, mediaType) => {
+                await newClient.subscribe(user, mediaType);
+                console.log('subscribe success');
                 if (mediaType === 'video') {
                     setUsers((prevUsers) => {
                         return [...prevUsers, user];
                     });
-
-                    // experiment
-                    user.videoTrack?.play(`user-${user.uid}`);
                 }
                 if (mediaType === 'audio') {
                     user.audioTrack?.play();
                 }
             });
 
-            client.on('user-unpublished', (user, type) => {
-                console.log('unpublished', user, type);
-                if (type === 'audio') {
-                    user.audioTrack?.stop();
-                }
-                if (type === 'video') {
-                    setUsers((prevUsers) => {
-                        return prevUsers.filter((User) => User.uid !== user.uid);
-                    });
-                }
-            });
+            // newClient.on('user-unpublished', (user, type) => {
+            //     console.log('unpublished', user, type);
+            //     if (type === 'audio') {
+            //         user.audioTrack?.stop();
+            //     }
+            //     if (type === 'video') {
+            //         console.log('Unpublish user video of user:', user.uid);
+            //         setUsers((prevUsers) => {
+            //             return prevUsers.filter((User) => User.uid !== user.uid);
+            //         });
+            //     }
+            // });
 
-            client.on('user-left', (user) => {
+            newClient.on('user-left', (user) => {
                 console.log('leaving', user);
                 setUsers((prevUsers) => {
                     return prevUsers.filter((User) => User.uid !== user.uid);
                 });
             });
 
-            // Fourth parameter is uid of the user.
-            await client.join(config.appId, channelName, config.token, uid);
             if (tracks) {
                 tracks[1].play(`user-${uid}`);
-                await client.publish([tracks[0], tracks[1]]);
+                await newClient.publish([tracks[0], tracks[1]]);
             }
+            setClient(newClient);
             setStart(true);
         };
 
@@ -119,9 +143,10 @@ export const RtcContextProvider: React.FC<Props> = (props) => {
             console.log('init ready');
             init(channelName);
         }
-    }, [channelName, client, ready, tracks, uid]);
+    }, [channelName, ready, tracks, uid]);
 
     const leaveChannel = async () => {
+        if (!client) return;
         await client.leave();
         client.removeAllListeners();
         if (tracks) {
@@ -132,16 +157,70 @@ export const RtcContextProvider: React.FC<Props> = (props) => {
         setInCall(false);
     };
 
+    // Screen sharing functionality
+    const toggleScreen = async () => {
+        if (!client) return;
+        console.log('Toggle Screen!');
+        if (!sharingScreen) {
+            setSharingScreen(true);
+            setDisplayFrameUid(uid);
+            if (tracks) await client.unpublish(tracks[1]);
+
+            const localScreenTracks = await AgoraRTC.createScreenVideoTrack(undefined as any);
+            setLocalScreenTracks(localScreenTracks);
+
+            if (Array.isArray(localScreenTracks)) {
+                // ILocalVideoTrack is the first element
+                localScreenTracks[0].play(`user-${uid}`);
+                await client.publish([localScreenTracks[0]]);
+            } else {
+                localScreenTracks.play(`user-${uid}`);
+                await client.publish([localScreenTracks]);
+            }
+            console.log('localScreenTracks:', localScreenTracks);
+        } else {
+            setSharingScreen(false);
+            setDisplayFrameUid(null);
+            if (localScreenTracks == null) return;
+
+            if (Array.isArray(localScreenTracks)) {
+                // ILocalVideoTrack is the first element
+                await client.unpublish([localScreenTracks[0]]);
+            } else {
+                await client.unpublish([localScreenTracks]);
+            }
+            switchToCamera();
+        }
+    };
+
+    // Called when switching from screen sharing back to normal mode
+    const switchToCamera = async () => {
+        if (tracks == null || client == null) return;
+
+        tracks[1].play(`user-${uid}`);
+        await client.publish([tracks[1]]);
+    };
+
+    // Video track of the client either null, screenTrack, or videoTrack
+    const currentClientVideoTrack: ILocalVideoTrack | null = useMemo(() => {
+        if (sharingScreen && localScreenTracks != null)
+            return getLocalScreenVideoTrack(localScreenTracks);
+        return tracks && tracks[1];
+    }, [sharingScreen, localScreenTracks, tracks]);
+
     const displayFrameUser: DisplayFrameUser | null = useMemo(() => {
-        // current user itself
+        // Client user is in the display frame.
         if (displayFrameUid === uid) {
             return {
                 uid,
-                videoTrack: tracks && tracks[1],
+                videoTrack: currentClientVideoTrack,
             };
         }
+        // One of the remote users are in the display frame.
         return users.find((user) => user.uid === displayFrameUid) || null;
-    }, [users, displayFrameUid, uid, tracks]);
+    }, [users, displayFrameUid, uid, currentClientVideoTrack]);
+
+    console.log('Current video track:', currentClientVideoTrack);
 
     const value = {
         uid,
@@ -156,6 +235,10 @@ export const RtcContextProvider: React.FC<Props> = (props) => {
         displayFrameUser,
         client,
         setDisplayFrameUid,
+        toggleScreen,
+        sharingScreen,
+        localScreenTracks,
+        clientVideoTrack: currentClientVideoTrack,
     };
 
     return <RtcContext.Provider value={value}>{children}</RtcContext.Provider>;

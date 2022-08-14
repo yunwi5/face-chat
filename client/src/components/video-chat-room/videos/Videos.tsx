@@ -1,15 +1,9 @@
 import React from 'react';
-import {
-    AgoraVideoPlayer,
-    ICameraVideoTrack,
-    IMicrophoneAudioTrack,
-    UID,
-} from 'agora-rtc-react';
+import { AgoraVideoPlayer } from 'agora-rtc-react';
 import { useRtcContext } from 'store/context/RtcContext';
 import { BaseImages } from 'constants/images';
 
 interface Props {
-    tracks: [IMicrophoneAudioTrack, ICameraVideoTrack];
     videoState: boolean;
 }
 
@@ -18,8 +12,9 @@ function getFrameSize(users: any[], displayFrameUser: any) {
     return users.length <= 2 ? '350px' : '200px';
 }
 
-const Videos: React.FC<Props> = ({ tracks, videoState }) => {
-    const { uid, users, displayFrameUser, setDisplayFrameUid } = useRtcContext();
+const Videos: React.FC<Props> = ({ videoState }) => {
+    const { uid, users, displayFrameUser, clientVideoTrack, setDisplayFrameUid } =
+        useRtcContext();
 
     const frameSize = getFrameSize(users, displayFrameUser);
     // If the client user is in the displayFrame, do not show it here (multiple times).
@@ -34,11 +29,11 @@ const Videos: React.FC<Props> = ({ tracks, videoState }) => {
                     style={{ width: frameSize, height: frameSize }}
                     onClick={() => setDisplayFrameUid(uid)}
                 >
-                    {videoState ? (
+                    {videoState && clientVideoTrack ? (
                         <AgoraVideoPlayer
-                            className="vid video-player"
+                            className="vid"
                             id={`user-${uid}`}
-                            videoTrack={tracks[1]}
+                            videoTrack={clientVideoTrack}
                             style={{ height: '100%', width: '100%' }}
                         />
                     ) : (
@@ -50,7 +45,6 @@ const Videos: React.FC<Props> = ({ tracks, videoState }) => {
                 const displayUser = user.uid !== displayFrameUser?.uid;
                 if (!displayUser) return null;
 
-                console.log('user has video:', user.hasAudio);
                 return (
                     <div
                         key={user.uid}
@@ -59,9 +53,9 @@ const Videos: React.FC<Props> = ({ tracks, videoState }) => {
                         style={{ width: frameSize, height: frameSize }}
                         onClick={() => setDisplayFrameUid(user.uid)}
                     >
-                        {user.videoTrack && user.hasVideo ? (
+                        {user.videoTrack ? (
                             <AgoraVideoPlayer
-                                className="vid video-player"
+                                className="vid"
                                 id={`user-${user.uid}`}
                                 videoTrack={user.videoTrack}
                                 style={{ height: '100%', width: '100%' }}

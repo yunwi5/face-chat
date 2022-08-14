@@ -10,7 +10,7 @@ interface Props {
 
 const Controls: React.FC<Props> = ({ onHandleTracks, trackState }) => {
     const navigate = useNavigate();
-    const { leaveChannel } = useRtcContext();
+    const { leaveChannel, toggleScreen, sharingScreen } = useRtcContext();
 
     const handleLeave = () => {
         leaveChannel();
@@ -23,7 +23,7 @@ const Controls: React.FC<Props> = ({ onHandleTracks, trackState }) => {
             <button
                 id="camera-btn"
                 onClick={() => onHandleTracks('video')}
-                className={`${trackState.video ? 'active' : 'non-active'}`}
+                className={`${trackState.video ? 'active' : 'in-active'}`}
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -38,7 +38,7 @@ const Controls: React.FC<Props> = ({ onHandleTracks, trackState }) => {
             <button
                 id="mic-btn"
                 onClick={() => onHandleTracks('audio')}
-                className={`${trackState.audio ? 'active' : 'non-active'}`}
+                className={`${trackState.audio ? 'active' : 'in-active'}`}
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -50,7 +50,11 @@ const Controls: React.FC<Props> = ({ onHandleTracks, trackState }) => {
                 </svg>
             </button>
             {/* Screen sharing button */}
-            <button id="screen-btn">
+            <button
+                id="screen-btn"
+                className={`${sharingScreen ? 'active' : 'in-active'}`}
+                onClick={toggleScreen}
+            >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
