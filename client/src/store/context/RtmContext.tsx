@@ -68,9 +68,9 @@ export const RtmContextProvider: React.FC<Props> = (props) => {
         setMessages((ps) => [...ps, userMessage]);
     }, []);
 
+    // Send the message through the channel as well, so that remote users can receive this message.
     const addClientUserMessage = async (text: string) => {
         addUserMessage({ text, uid, name: displayName });
-        console.log('Send channel message');
         await channelRef.current.channel?.sendMessage({
             text: JSON.stringify({ type: 'chat', message: text, displayName }),
         });
@@ -83,7 +83,6 @@ export const RtmContextProvider: React.FC<Props> = (props) => {
                 memberId,
                 ['name'],
             );
-            console.log('Attributes:', attributes);
             if (attributes == null) return;
 
             const { name } = attributes;
@@ -98,17 +97,14 @@ export const RtmContextProvider: React.FC<Props> = (props) => {
     );
 
     const handleMemberLeft = useCallback((memberId: string) => {
-        console.log('MemberLeft ID:', memberId);
         setParticipants((prevList) => prevList.filter((mem) => mem.uid !== memberId));
     }, []);
 
     const handleChannelMessage = useCallback(
         async (messageData: RtmMessage, memberId: string) => {
-            console.log('RTM Message:', messageData);
             const data = JSON.parse((messageData as any).text);
             const { displayName, message, type } = data;
 
-            console.log('displayName:', displayName, 'message:', message);
             if (message != null)
                 addUserMessage({ text: message, uid: memberId, name: displayName });
         },
@@ -117,7 +113,6 @@ export const RtmContextProvider: React.FC<Props> = (props) => {
 
     const addParticipant = useCallback(async (memberId: string) => {
         const client = clientRef.current.client;
-        console.log('client:', client);
         if (client == null) return;
         const member = await client.getUserAttributesByKeys(memberId, ['name']);
         setParticipants((prevList) => {
@@ -142,16 +137,12 @@ export const RtmContextProvider: React.FC<Props> = (props) => {
             setIsLoading(true);
             const newClient: RtmClient = AgoraRTM.createInstance(config.appId);
             await newClient.login({ uid: uid });
-            console.log('Client Login');
 
             const newChannel = newClient.createChannel(channelName);
             await newChannel.join();
-            console.log('Client join');
 
             // add name to the rtmClient, so that member names can be displayed in the participants list
             await newClient.addOrUpdateLocalUserAttributes({ name: displayName });
-
-            console.log('client and channel:', newClient, newChannel);
 
             // Add 3 event listeners to the rtm client
             newChannel.on('MemberJoined', handleMmemberJoin);
@@ -187,9 +178,6 @@ export const RtmContextProvider: React.FC<Props> = (props) => {
         window.addEventListener('beforeunload', leaveChannel);
         return () => window.removeEventListener('beforeunload', leaveChannel);
     });
-
-    console.log('participants:', participants);
-    console.log('isLoading:', isLoading);
 
     const value = {
         client: clientRef.current.client,
