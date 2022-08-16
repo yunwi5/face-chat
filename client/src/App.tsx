@@ -5,7 +5,6 @@ import ChatRoom from './pages/ChatRoom';
 import Home from 'pages/Home';
 import Lobby from 'pages/Lobby';
 import Header from 'layout/header/Header';
-import { config } from 'config/settings';
 
 function App() {
     const pathname = useLocation().pathname;

@@ -1,17 +1,26 @@
-import React, { useContext, useEffect, useState } from 'react';
-import AgoraRTM, { RtmChannel, RtmClient } from 'agora-rtm-sdk';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import AgoraRTM, { RtmChannel, RtmClient, RtmMessage } from 'agora-rtm-sdk';
 import { config } from 'config/settings';
+import { IMember, IChatMessage, MessageType, BOT_UID } from 'models/rtm-models';
 
 interface IRtmContext {
-    client: RtmClient | null;
-    channel: RtmChannel | null;
-    messages: any[];
+    client: RtmClient | null | undefined;
+    channel: RtmChannel | null | undefined;
+    messages: IChatMessage[];
+    participants: IMember[];
+    isLoading: boolean;
+    addUserMessage: (message: string) => void;
+    addBotMessage: (message: string) => void;
 }
 
 const RtmContext = React.createContext<IRtmContext>({
     client: null,
     channel: null,
     messages: [],
+    participants: [],
+    isLoading: false,
+    addUserMessage: () => {},
+    addBotMessage: () => {},
 });
 
 export const useRtmContext = () => useContext(RtmContext);
@@ -23,36 +32,174 @@ interface Props {
     displayName: string;
 }
 
+interface UserMessageProps {
+    text: string;
+    uid: string;
+    name: string;
+}
+
 export const RtmContextProvider: React.FC<Props> = (props) => {
     const { children, uid, channelName, displayName } = props;
-    const [client, setClient] = useState<RtmClient | null>(null);
-    const [channel, setChannel] = useState<RtmChannel | null>(null);
+    const clientRef = useRef<{ client?: RtmClient }>({});
+    const channelRef = useRef<{ channel?: RtmChannel }>({});
+
+    const [participants, setParticipants] = useState<IMember[]>([]);
+    const [messages, setMessages] = useState<IChatMessage[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+
+    const addBotMessage = useCallback((message: string) => {
+        const botMessage = {
+            type: MessageType.BOT,
+            text: message,
+            dateTime: new Date(),
+            uid: BOT_UID,
+        };
+        setMessages((ps) => [...ps, botMessage]);
+    }, []);
+
+    const addUserMessage = useCallback(({ text, uid, name }: UserMessageProps) => {
+        const userMessage = {
+            type: MessageType.USER,
+            text,
+            dateTime: new Date(),
+            uid,
+            name,
+        };
+        setMessages((ps) => [...ps, userMessage]);
+    }, []);
+
+    const addClientUserMessage = async (text: string) => {
+        addUserMessage({ text, uid, name: displayName });
+        console.log('Send channel message');
+        await channelRef.current.channel?.sendMessage({
+            text: JSON.stringify({ type: 'chat', message: text, displayName }),
+        });
+    };
+
+    const handleMmemberJoin = useCallback(
+        async (memberId: string) => {
+            console.log('A new member has joined the room:', memberId);
+            const attributes = await clientRef.current.client?.getUserAttributesByKeys(
+                memberId,
+                ['name'],
+            );
+            console.log('Attributes:', attributes);
+            if (attributes == null) return;
+
+            const { name } = attributes;
+            setParticipants((prevList) => {
+                console.log('prevList:', prevList);
+                if (prevList.find((mem) => mem.uid === memberId)) return [...prevList];
+                return [...prevList, { uid: memberId, name }];
+            });
+            addBotMessage(`Welcome to the room ${name}! 👋`);
+        },
+        [addBotMessage],
+    );
+
+    const handleMemberLeft = useCallback((memberId: string) => {
+        console.log('MemberLeft ID:', memberId);
+        setParticipants((prevList) => prevList.filter((mem) => mem.uid !== memberId));
+    }, []);
+
+    const handleChannelMessage = useCallback(
+        async (messageData: RtmMessage, memberId: string) => {
+            console.log('RTM Message:', messageData);
+            const data = JSON.parse((messageData as any).text);
+            const { displayName, message, type } = data;
+
+            console.log('displayName:', displayName, 'message:', message);
+            if (message != null)
+                addUserMessage({ text: message, uid: memberId, name: displayName });
+        },
+        [addUserMessage],
+    );
+
+    const addParticipant = useCallback(async (memberId: string) => {
+        const client = clientRef.current.client;
+        console.log('client:', client);
+        if (client == null) return;
+        const member = await client.getUserAttributesByKeys(memberId, ['name']);
+        setParticipants((prevList) => {
+            if (prevList.find((mem) => mem.uid === memberId)) return [...prevList];
+            return [...prevList, { uid: memberId, name: member['name'] }];
+        });
+    }, []);
+
+    const getParticipants = useCallback(async () => {
+        const channel = channelRef.current.channel;
+        if (channel == null) return;
+
+        // list of member ids
+        const members = await channel.getMembers();
+        members.forEach((memberId: string) => {
+            addParticipant(memberId);
+        });
+    }, [addParticipant]);
 
     useEffect(() => {
         const init = async () => {
-            const client = AgoraRTM.createInstance(config.appId);
-            client.login({ uid, token: config.token ?? undefined });
+            setIsLoading(true);
+            const newClient: RtmClient = AgoraRTM.createInstance(config.appId);
+            await newClient.login({ uid: uid });
+            console.log('Client Login');
 
-            const newChannel = client.createChannel(channelName);
+            const newChannel = newClient.createChannel(channelName);
             await newChannel.join();
+            console.log('Client join');
 
             // add name to the rtmClient, so that member names can be displayed in the participants list
-            await client.addOrUpdateLocalUserAttributes({ name: displayName });
+            await newClient.addOrUpdateLocalUserAttributes({ name: displayName });
+
+            console.log('client and channel:', newClient, newChannel);
 
             // Add 3 event listeners to the rtm client
-            newChannel.on('MemberJoined', (memberId) => {});
-            newChannel.on('MemberLeft', (memberId) => {});
+            newChannel.on('MemberJoined', handleMmemberJoin);
+            newChannel.on('MemberLeft', handleMemberLeft);
             // Occurs when the local user receives a channel message
-            newChannel.on('ChannelMessage', () => {});
+            newChannel.on('ChannelMessage', handleChannelMessage);
 
-            setClient(client);
-            setChannel(newChannel);
+            clientRef.current.client = newClient;
+            channelRef.current.channel = newChannel;
+
+            getParticipants();
+            addBotMessage(`Welcome to the room ${displayName}! 👋`);
+            setIsLoading(false);
+        };
+        init();
+    }, [
+        uid,
+        channelName,
+        displayName,
+        getParticipants,
+        addBotMessage,
+        handleMmemberJoin,
+        handleMemberLeft,
+        handleChannelMessage,
+    ]);
+
+    useEffect(() => {
+        const leaveChannel = async () => {
+            await channelRef.current.channel?.leave();
+            await clientRef.current.client?.logout();
         };
 
-        init();
-    }, [uid, channelName, displayName]);
+        window.addEventListener('beforeunload', leaveChannel);
+        return () => window.removeEventListener('beforeunload', leaveChannel);
+    });
 
-    const value = { client: client, channel: channel, messages: [] };
+    console.log('participants:', participants);
+    console.log('isLoading:', isLoading);
+
+    const value = {
+        client: clientRef.current.client,
+        channel: channelRef.current.channel,
+        messages,
+        participants,
+        isLoading,
+        addBotMessage,
+        addUserMessage: addClientUserMessage,
+    };
 
     return <RtmContext.Provider value={value}>{children}</RtmContext.Provider>;
 };

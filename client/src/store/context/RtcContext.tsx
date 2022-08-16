@@ -9,6 +9,7 @@ import AgoraRTC, { IRemoteVideoTrack, ILocalVideoTrack } from 'agora-rtc-sdk-ng'
 import { config, encoderConfig } from 'config/settings';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { getLocalScreenVideoTrack, ILocalScreenTrack } from 'utils/chat-utils/video-util';
+import { useRtmContext } from './RtmContext';
 
 interface IRtcContext {
     start: boolean;
@@ -58,6 +59,8 @@ interface DisplayFrameUser {
 
 export const RtcContextProvider: React.FC<Props> = (props) => {
     const { children, channelName, displayName, uid } = props;
+    const { isLoading: isRtmLoading } = useRtmContext();
+
     // inCall controls user entering or leaving the stream.
     const [users, setUsers] = useState<IAgoraRTCRemoteUser[]>([]);
     const [start, setStart] = useState<boolean>(false);
@@ -77,6 +80,8 @@ export const RtcContextProvider: React.FC<Props> = (props) => {
         // function to initialise the SDK
         let init = async (name: string) => {
             console.log('init', name);
+            // Do not log in to Rtm and Rtc at the same time.
+            if (isRtmLoading) return;
 
             // Agora RTC SDK
             const newClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
@@ -128,7 +133,7 @@ export const RtcContextProvider: React.FC<Props> = (props) => {
                 { encoderConfig },
             );
 
-            tracks[1].play(`user-${uid}`);
+            // tracks[1].play(`user-${uid}`);
             await newClient.publish([tracks[0], tracks[1]]);
 
             setClient(newClient);
@@ -137,7 +142,7 @@ export const RtcContextProvider: React.FC<Props> = (props) => {
         };
 
         init(channelName);
-    }, [channelName, uid]);
+    }, [channelName, uid, isRtmLoading]);
 
     const leaveChannel = async () => {
         if (!client) return;
