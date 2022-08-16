@@ -6,6 +6,7 @@ import ChatRoomMain from 'components/video-chat-room/ChatRoomMain';
 import ChatRoomHeader from 'components/video-chat-room/layout/ChatRoomHeader';
 import { RtcContextProvider } from 'store/context/RtcContext';
 import { getRandomUid } from 'utils/string-utils/uid';
+import { RtmContextProvider } from 'store/context/RtmContext';
 
 const ChatRoom = () => {
     const navigate = useNavigate();
@@ -36,10 +37,12 @@ const ChatRoom = () => {
                 </title>
                 <meta name="description" content="Video chat room of multiple real users" />
             </Helmet>
-            <RtcContextProvider {...props}>
-                <ChatRoomHeader />
-                <ChatRoomMain />
-            </RtcContextProvider>
+            <RtmContextProvider {...props}>
+                <RtcContextProvider {...props}>
+                    <ChatRoomHeader />
+                    <ChatRoomMain />
+                </RtcContextProvider>
+            </RtmContextProvider>
         </>
     );
 };

@@ -6,7 +6,7 @@ import {
     UID,
 } from 'agora-rtc-react';
 import AgoraRTC, { IRemoteVideoTrack, ILocalVideoTrack } from 'agora-rtc-sdk-ng';
-import { config, useClient, useMicrophoneAndCameraTracks } from 'config/settings';
+import { config, encoderConfig } from 'config/settings';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { getLocalScreenVideoTrack, ILocalScreenTrack } from 'utils/chat-utils/video-util';
 
@@ -92,7 +92,6 @@ export const RtcContextProvider: React.FC<Props> = (props) => {
                     user.audioTrack?.play();
                 }
                 setUsers((prevUsers) => {
-                    // ensure do not add twice
                     console.log(
                         'found:',
                         prevUsers.find((pu) => pu.uid === user.uid),
@@ -107,15 +106,14 @@ export const RtcContextProvider: React.FC<Props> = (props) => {
             });
 
             newClient.on('user-unpublished', (user, type) => {
-                console.log('User Unpublished!!!', user, type);
+                console.log('User Unpublished!', user, type);
                 if (type === 'audio') {
                     user.audioTrack?.stop();
                 }
                 if (type === 'video') {
-                    console.log('Unpublish user video of user:', user.uid);
                     user.videoTrack?.stop();
                 }
-                setUsers((prevUsers) => [...prevUsers]);
+                // setUsers((prevUsers) => [...prevUsers]);
             });
 
             newClient.on('user-left', (user) => {
@@ -127,12 +125,7 @@ export const RtcContextProvider: React.FC<Props> = (props) => {
 
             const tracks = await AgoraRTC.createMicrophoneAndCameraTracks(
                 {},
-                {
-                    encoderConfig: {
-                        width: { min: 640, ideal: 1920, max: 1920 },
-                        height: { min: 480, ideal: 1080, max: 1080 },
-                    },
-                },
+                { encoderConfig },
             );
 
             tracks[1].play(`user-${uid}`);
@@ -144,7 +137,7 @@ export const RtcContextProvider: React.FC<Props> = (props) => {
         };
 
         init(channelName);
-    }, [channelName, client, uid]);
+    }, [channelName, uid]);
 
     const leaveChannel = async () => {
         if (!client) return;
@@ -196,7 +189,6 @@ export const RtcContextProvider: React.FC<Props> = (props) => {
     // Called when switching from screen sharing back to normal mode
     const switchToCamera = async () => {
         if (tracks == null || client == null) return;
-
         tracks[1].play(`user-${uid}`);
         await client.publish([tracks[1]]);
     };
