@@ -1,16 +1,16 @@
+import React, { useContext, useEffect, useState } from 'react';
 import AgoraRTM, { RtmChannel, RtmClient } from 'agora-rtm-sdk';
 import { config } from 'config/settings';
-import React, { useContext, useEffect, useState } from 'react';
 
 interface IRtmContext {
-    client: any;
-    channel: string;
+    client: RtmClient | null;
+    channel: RtmChannel | null;
     messages: any[];
 }
 
 const RtmContext = React.createContext<IRtmContext>({
     client: null,
-    channel: '',
+    channel: null,
     messages: [],
 });
 
@@ -52,7 +52,7 @@ export const RtmContextProvider: React.FC<Props> = (props) => {
         init();
     }, [uid, channelName, displayName]);
 
-    const value = { client: null, channel: '', messages: [] };
+    const value = { client: client, channel: channel, messages: [] };
 
     return <RtmContext.Provider value={value}>{children}</RtmContext.Provider>;
 };
