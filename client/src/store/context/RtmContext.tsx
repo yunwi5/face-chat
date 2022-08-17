@@ -9,6 +9,7 @@ interface IRtmContext {
     messages: IChatMessage[];
     participants: IMember[];
     isLoading: boolean;
+    uid: string;
     addUserMessage: (message: string) => void;
     addBotMessage: (message: string) => void;
 }
@@ -19,6 +20,7 @@ const RtmContext = React.createContext<IRtmContext>({
     messages: [],
     participants: [],
     isLoading: false,
+    uid: '',
     addUserMessage: () => {},
     addBotMessage: () => {},
 });
@@ -180,6 +182,7 @@ export const RtmContextProvider: React.FC<Props> = (props) => {
     });
 
     const value = {
+        uid,
         client: clientRef.current.client,
         channel: channelRef.current.channel,
         messages,

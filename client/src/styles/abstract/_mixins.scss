@@ -1,0 +1,23 @@
+@mixin flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@mixin max-query($break-point) {
+    @media only screen and (max-width: $break-point) {
+        @content;
+    }
+}
+
+@mixin min-query($break-point) {
+    @media only screen and (min-width: $break-point) {
+        @content;
+    }
+}
+
+@mixin interval-query($bp-1, $bp-2) {
+    @media screen and (min-width: $bp-1) and (max-width: $bp-2) {
+        @content;
+    }
+}

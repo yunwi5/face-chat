@@ -1,38 +1,24 @@
-import { MessageType } from 'models/rtm-models';
+import { useEffect, useRef } from 'react';
 import { useRtmContext } from 'store/context/RtmContext';
+import ChatMessage from './ChatMessage';
 import ChatMessageForm from './ChatMessageForm';
 
 const ChatMessageSidebar: React.FC = () => {
     const { messages } = useRtmContext();
+    const messageContainerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (messageContainerRef.current == null) return;
+        const lastMessage = messageContainerRef.current.querySelector(':scope > *:last-child');
+        lastMessage?.scrollIntoView();
+    }, [messages]);
 
     return (
         <section id="messages__container">
-            <div id="messages">
-                {messages.map((message, idx) => {
-                    const isBot = message.type === MessageType.BOT;
-                    return (
-                        <div key={idx} className="message__wrapper">
-                            <div
-                                className={`${isBot ? 'message__body__bot' : 'message__body'}`}
-                            >
-                                <strong
-                                    className={`${
-                                        isBot ? 'message__author__bot' : 'message__author'
-                                    }`}
-                                >
-                                    {isBot ? '🤖 Mumble Bot' : message.name || 'Unknown'}
-                                </strong>
-                                <p
-                                    className={`${
-                                        isBot ? 'message__text__bot' : 'message__text'
-                                    } `}
-                                >
-                                    {message.text}
-                                </p>
-                            </div>
-                        </div>
-                    );
-                })}
+            <div id="messages" ref={messageContainerRef}>
+                {messages.map((message, idx) => (
+                    <ChatMessage key={idx} message={message} />
+                ))}
             </div>
 
             <ChatMessageForm />
