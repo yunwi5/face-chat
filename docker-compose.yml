@@ -1,0 +1,21 @@
+version: "3"
+services:
+  facechat-client:
+    # Specify the location of the client Makefile
+    build: ./client/
+    stdin_open: true
+    # mapping the exposed port i.e, 3000 to our machine port 3000.
+    # so that we can test the application on our port 3000.
+    ports:
+      - "3000:3000"
+    networks:
+      - facechat
+networks:
+  facechat:
+    driver: bridge
+
+# Haven't created the back-end yet.
+# Will enable volumes once we create a back-end server.
+# volumes:
+#   mongo-data:
+#     driver: local

@@ -1,0 +1,7 @@
+# Ignore node_modules when building the image
+node_modules
+
+# Ignore yarn related files
+yarn-error*
+yarn-error.log
+yarn.lock
