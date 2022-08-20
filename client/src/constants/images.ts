@@ -1,5 +1,7 @@
-import logo from 'assets/images/logo.png';
+import Logo from 'assets/images/logo.png';
+import UserGroupChat from 'assets/images/user-chat.jpg';
 
 export const BaseImages = {
-    logo,
+    Logo,
+    UserGroupChat,
 };

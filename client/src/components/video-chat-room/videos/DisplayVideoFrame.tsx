@@ -35,7 +35,7 @@ const DisplayVideoFrame: React.FC<Props> = ({ videoState }) => {
                         style={{ height: '100%', width: '100%' }}
                     />
                 ) : (
-                    <img src={BaseImages.logo} alt={`User Placeholder`} />
+                    <img src={BaseImages.Logo} alt={`User Placeholder`} />
                 )}
             </div>
         </div>

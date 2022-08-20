@@ -7,7 +7,7 @@ const HeaderLogo = () => {
     return (
         <NavLink to="/">
             <h3 id="logo">
-                <img src={BaseImages.logo} alt={`${APP_NAME} Logo`} />
+                <img src={BaseImages.Logo} alt={`${APP_NAME} Logo`} />
                 <span>{APP_NAME}</span>
             </h3>
         </NavLink>

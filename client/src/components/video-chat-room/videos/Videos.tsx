@@ -31,7 +31,7 @@ const Videos: React.FC<Props> = ({ videoState }) => {
                 >
                     <img
                         className={'video__image'}
-                        src={BaseImages.logo}
+                        src={BaseImages.Logo}
                         alt={`User Placeholder`}
                     />
                     {videoState && clientVideoTrack ? (
@@ -58,7 +58,7 @@ const Videos: React.FC<Props> = ({ videoState }) => {
                     >
                         <img
                             className={'video__image'}
-                            src={BaseImages.logo}
+                            src={BaseImages.Logo}
                             alt={`User Placeholder`}
                         />
                         {user.videoTrack ? (
