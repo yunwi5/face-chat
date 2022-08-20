@@ -10,6 +10,8 @@ services:
       - "3000:3000"
     networks:
       - facechat
+    volumes:
+      - /usr/src/app/node_modules
 networks:
   facechat:
     driver: bridge
