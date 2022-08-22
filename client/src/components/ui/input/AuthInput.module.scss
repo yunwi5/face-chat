@@ -1,0 +1,59 @@
+@import '../../../styles/abstract/variables';
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.31rem;
+
+    label {
+        font-size: 1rem;
+        color: $color-gray-1;
+    }
+
+    .control {
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+
+        color: $color-gray-7;
+        overflow: hidden;
+        background-color: $color-gray-1;
+        border-radius: 3px;
+        padding: 7.5px 10px;
+
+        $border-thickness: 3px;
+        border: $border-thickness solid currentColor;
+        &:focus-within {
+            border: $border-thickness solid $color-pink-5;
+            // box-shadow: 3px 6px 6px $color-gray-1;
+        }
+    }
+
+    .control.small {
+        padding: 4.5px 10px;
+        font-size: 1.05rem;
+        .icon {
+            font-size: 1.2rem;
+        }
+    }
+
+    .icon {
+        color: $color-grey-7;
+        font-size: 1.3em;
+    }
+
+    .divider {
+        height: 2rem;
+        min-width: 2.5px;
+        background-color: $color-gray-5;
+    }
+
+    input {
+        max-width: 75%;
+        background-color: inherit;
+        &:focus {
+            outline: none;
+        }
+    }
+}

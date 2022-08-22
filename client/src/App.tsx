@@ -6,6 +6,7 @@ import Home from 'pages/Home';
 import Lobby from 'pages/Lobby';
 import Header from 'layout/header/Header';
 import Login from 'pages/auth/Login';
+import SignUp from 'pages/auth/SignUp';
 
 function App() {
     const pathname = useLocation().pathname;
@@ -18,6 +19,7 @@ function App() {
                 <Route path="/video-chat/:id" element={<ChatRoom />} />
                 <Route path="/lobby" element={<Lobby />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/sign-up" element={<SignUp />} />
                 <Route path="*" element={<Home />} />
             </Routes>
         </div>

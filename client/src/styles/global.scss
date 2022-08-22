@@ -10,6 +10,7 @@
 @import './base/animations';
 @import './base/utilities';
 
+@import './components';
 @import './layout/layout';
 @import './pages/lobby';
 @import './pages/room';
@@ -60,4 +61,10 @@ body {
 p,
 a {
     font-weight: 300;
+}
+
+@layer components {
+    .flex-center {
+        @apply flex justify-center items-center;
+    }
 }

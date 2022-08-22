@@ -1,0 +1,35 @@
+@import '../../../styles/abstract/variables';
+@import '../../../styles/abstract/mixins';
+
+.btn {
+    color: $color-gray-1;
+    @include flex-center;
+    transition: all 0.3s ease-in-out;
+    border-radius: 3px;
+
+    &:hover,
+    &:focus {
+        box-shadow: 0 2px 7px rgba($color-yellow-3, 0.5);
+    }
+}
+
+// Button theme classes
+.btn-pink {
+    background-color: rgba($color-pink-6, 0.9) !important;
+
+    &:hover,
+    &:focus {
+        background-color: rgba($color-pink-8, 1) !important;
+    }
+}
+
+// Button size classes
+.btn-medium {
+    padding: 0.3rem 1rem;
+    font-size: 1.15rem;
+}
+
+.btn-large {
+    padding: 0.5rem 1.75rem;
+    font-size: 1.25rem;
+}

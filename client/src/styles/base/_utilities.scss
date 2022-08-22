@@ -1,0 +1,10 @@
+.link-underline {
+    &:hover {
+        color: $color-pink-4;
+    }
+    @include underline-from-middle($color-pink-4, 1.8px);
+}
+
+.hide-scrollbar {
+    @include hide-scrollbar;
+}

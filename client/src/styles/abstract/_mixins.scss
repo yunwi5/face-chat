@@ -4,6 +4,43 @@
     align-items: center;
 }
 
+@mixin pos-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@mixin hide-scrollbar() {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+
+    // Chrome and Safari
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+@mixin underline-from-middle($bg, $size: 2px) {
+    position: relative;
+
+    &::after {
+        content: '';
+        height: $size;
+        width: 0;
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        transition: all 0.35s ease-out;
+        background-color: $bg;
+    }
+
+    &:hover::after {
+        width: 100%;
+    }
+}
+
 @mixin max-query($break-point) {
     @media only screen and (max-width: $break-point) {
         @content;

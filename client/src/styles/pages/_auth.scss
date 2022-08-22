@@ -1,3 +1,14 @@
+@keyframes slide-from-left {
+    0% {
+        transform: translateX(100%);
+        opacity: 0.5;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
 #auth-portal {
     width: 100vw;
     height: Max(100vh, 50rem);
@@ -6,6 +17,7 @@
     left: 0;
     background-color: #282828 !important;
     z-index: 300;
+    animation: slide-from-left 0.5s ease-out;
 
     .image-container {
         position: absolute;
