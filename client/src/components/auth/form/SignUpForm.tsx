@@ -1,9 +1,8 @@
+import React from 'react';
 import { faEnvelope, faLockKeyhole, faUser } from '@fortawesome/pro-duotone-svg-icons';
 import { faLockKeyhole as faLockKeyholeRegular } from '@fortawesome/pro-regular-svg-icons';
 import Button from 'components/ui/button/Button';
 import AuthInput from 'components/ui/input/AuthInput';
-import React from 'react';
-import { Link } from 'react-router-dom';
 import { getLogInRoute } from 'utils/routes';
 import AuthLink from '../partials/AuthLink';
 import SocialLogin from '../social/SocialLogin';

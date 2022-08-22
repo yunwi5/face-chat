@@ -33,7 +33,7 @@ export const FacebookLogin = () => {
     return (
         <button className={`${buttonClass} bg-blue-200/90 hover:bg-blue-400/90 text-gray-700`}>
             <FacebookIcon width="32px" />
-            Continue with Google
+            Continue with Facebook
         </button>
     );
 };

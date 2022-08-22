@@ -20,14 +20,13 @@
         overflow: hidden;
         background-color: $color-gray-1;
         border-radius: 3px;
-        padding: 7.5px 10px;
+        padding: 6.5px 10px;
         position: relative;
 
         $border-thickness: 3px;
         border: $border-thickness solid currentColor;
         &:focus-within {
             border: $border-thickness solid $color-pink-5;
-            // box-shadow: 3px 6px 6px $color-gray-1;
         }
     }
 
