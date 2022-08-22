@@ -21,6 +21,7 @@
         background-color: $color-gray-1;
         border-radius: 3px;
         padding: 7.5px 10px;
+        position: relative;
 
         $border-thickness: 3px;
         border: $border-thickness solid currentColor;
@@ -47,6 +48,15 @@
         height: 2rem;
         min-width: 2.5px;
         background-color: $color-gray-5;
+    }
+
+    .visibility {
+        position: absolute;
+        top: 50%;
+        right: 1rem;
+        transform: translateY(-50%);
+        color: $color-gray-5;
+        cursor: pointer;
     }
 
     input {
