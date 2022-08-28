@@ -35,7 +35,7 @@ const LogInForm: React.FC = () => {
         <FormProvider {...methods}>
             <form
                 onSubmit={methods.handleSubmit(handleSubmit)}
-                className="flex flex-col gap-4 py-5 max-w-[22.5rem]"
+                className="flex flex-col gap-4 py-5"
             >
                 <AuthInput
                     type="email"

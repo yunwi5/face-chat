@@ -32,7 +32,7 @@ const HeaderNavList = () => {
             <NavLink className="nav__link link-underline" to="/login">
                 Log In
             </NavLink>
-            <NavLink className="" to="/login">
+            <NavLink className="" to="/sign-up">
                 <button className="flex-center gap-2 px-4 py-2 bg-pink-600/80 hover:bg-pink-700 rounded-full text-gray-50 transition-all hover:shadow-sm hover:shadow-yellow-200">
                     <FontAwesomeIcon icon={faUserPlus} className="text-white" />
                     Sign Up
