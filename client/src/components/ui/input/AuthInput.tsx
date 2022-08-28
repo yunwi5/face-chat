@@ -3,6 +3,7 @@ import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styles from './AuthInput.module.scss';
 import { faEye, faEyeSlash } from '@fortawesome/pro-regular-svg-icons';
+import { useFormContext } from 'react-hook-form';
 
 interface Props {
     type: 'text' | 'email' | 'password';
@@ -16,6 +17,12 @@ interface Props {
 
 const AuthInput: React.FC<Props> = (props) => {
     let { type, label, id, name, icon, size = 'large', placeholder } = props;
+
+    const {
+        register,
+        formState: { errors },
+    } = useFormContext();
+
     const [passwordVisible, setPasswordVisible] = useState(false);
 
     let adjustedType = type;
@@ -29,7 +36,13 @@ const AuthInput: React.FC<Props> = (props) => {
             <div className={`${styles.control} ${size ? styles[size] : ''}`}>
                 <FontAwesomeIcon icon={icon} className={styles.icon} />
                 <span className={styles.divider} />
-                <input type={adjustedType} name={name} id={id} placeholder={placeholder} />
+                <input
+                    {...register(name)}
+                    type={adjustedType}
+                    name={name}
+                    id={id}
+                    placeholder={placeholder}
+                />
                 {type === 'password' && (
                     <FontAwesomeIcon
                         onClick={() => setPasswordVisible((ps) => !ps)}
@@ -38,6 +51,9 @@ const AuthInput: React.FC<Props> = (props) => {
                     />
                 )}
             </div>
+            {errors[name]?.message && (
+                <p className="text-rose-300">{(errors[name]?.message as any) ?? ''}</p>
+            )}
         </div>
     );
 };
